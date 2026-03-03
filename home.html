@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ホーム</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f2f2f2;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .tab-bar {
+      display: flex;
+      border-top: 1px solid #ccc;
+      background: #fff;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px 0;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: #e0e0e0;
+      font-weight: bold;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+    li {
+  background: white;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.subject {
+  font-weight: bold;
+}
+
+.days {
+  font-size: 12px;
+  margin-top: 4px;
+}
+  </style>
+  <link rel="stylesheet" href="home.css">
+</head>
+<body>
+
+  <!-- 画面エリア -->
+  <div class="content">
+
+    <!-- ホーム -->
+    <div id="home" class="screen active">
+    <img src="logo.png" style="height:40px; margin-bottom:10px;"> 
+      <h2>🏠 期限が近いもの</h2>
+
+  <button onclick="logout()" style="margin-bottom:15px;">
+    ログアウト
+  </button>
+
+  <ul id="taskList"></ul>
+</div>
+
+    <!-- 時間割 -->
+    <div id="timetable" class="screen">
+      📅 時間割（仮）
+    </div>
+
+    <!-- 投稿 -->
+<div id="post" class="screen">
+  <h2>📝 課題を投稿</h2>
+
+  <select id="postSubject">
+    <option value="">教科を選択</option>
+    <option value="数学">数学</option>
+    <option value="英語">英語</option>
+    <option value="国語">国語</option>
+    <option value="生物">生物</option>
+    <option value="物理">物理</option>
+    <option value="化学">化学</option>
+    <option value="その他">その他</option>
+  </select>
+
+  <br><br>
+
+  <input type="text" id="postTitle" placeholder="課題名">
+
+  <br><br>
+
+  <input type="date" id="postDate">
+
+  <br><br>
+
+  <button id="postBtn">投稿</button>
+</div>
+    
+
+    <!-- 質問 -->
+    <div id="question" class="screen">
+      <h2>❓ 質問</h2>
+      <p>※ ここはあとで作りこむ予定</p>
+      <p>質問投稿・回答・未解決表示などを追加できる</p>
+    </div>
+
+    <!-- タイマー -->
+    <div id="timer" class="screen">
+      ⏱ タイマー（仮）
+    </div>
+
+  </div>
+
+  <!-- 下タブ -->
+  <div class="tab-bar">
+    <div class="tab active" data-target="home">🏠</div>
+    <div class="tab" data-target="timetable">📅</div>
+    <div class="tab" data-target="post">📝</div>
+    <div class="tab" data-target="question">❓</div>
+    <div class="tab" data-target="timer">⏱</div>
+  </div>
+
+  <script>
+    // タブ切り替え
+    const tabs = document.querySelectorAll(".tab");
+    const screens = document.querySelectorAll(".screen");
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        const target = tab.dataset.target;
+        screens.forEach(screen => screen.classList.remove("active"));
+        document.getElementById(target).classList.add("active");
+      });
+    });
+
+    // 課題データ
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [
+  { subject: "数学", title: "数学ワーク", dueDate: "2026-03-03", completed: false },
+  { subject: "英語", title: "英語小テスト", dueDate: "2026-03-05", completed: false },
+  { subject: "生物", title: "生物レポート", dueDate: "2026-03-07", completed: false }
+];
+
+    const taskList = document.getElementById("taskList");
+
+    function calcDaysLeft(dueDate) {
+      const today = new Date();
+      const deadline = new Date(dueDate);
+      today.setHours(0,0,0,0);
+      deadline.setHours(0,0,0,0);
+      return Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+    }
+
+    function renderTasks() {
+  taskList.innerHTML = "";
+
+  tasks.forEach((task, index) => {
+    const daysLeft = calcDaysLeft(task.dueDate);
+    if (daysLeft > 7) return
+    const li = document.createElement("li");
+const checkbox = document.createElement("input");
+checkbox.type = "checkbox";
+checkbox.checked = task.completed || false;
+
+checkbox.addEventListener("change", () => {
+  tasks[index].completed = checkbox.checked;
+  saveTasks();
+  // 投稿処理
+const postBtn = document.getElementById("postBtn");
+
+postBtn.addEventListener("click", () => {
+  const subject = document.getElementById("postSubject").value;
+  const title = document.getElementById("postTitle").value;
+  const dueDate = document.getElementById("postDate").value;
+
+  if (subject === "" || title === "" || dueDate === "") {
+    alert("全部入力してね");
+    return;
+  }
+
+  tasks.push({ subject, title, dueDate, completed: false });
+  saveTasks();
+  renderTasks();
+  alert("ホームに追加しました！");
+});
+  renderTasks();
+});
+    const info = document.createElement("div");
+    info.className = "task-info";
+
+    const subject = document.createElement("div");
+    subject.className = "subject";
+    subject.textContent = `${task.subject}：${task.title}`;
+
+    const days = document.createElement("div");
+    days.className = "days";
+if (task.completed) {
+  li.style.opacity = "0.5";
+}
+    if (daysLeft < 0) {
+  days.textContent = "期限切れ";
+  days.style.color = "red";
+  li.style.backgroundColor = "#ffe5e5"; // 期限切れは薄赤
+} else if (daysLeft === 0) {
+  days.textContent = "今日まで";
+  days.style.color = "red";
+  li.style.backgroundColor = "#fff0f0"; // 今日までを淡い赤
+} else {
+  days.textContent = `あと${daysLeft}日`;
+}
+
+    info.appendChild(subject);
+    info.appendChild(days);
+
+    
+    li.appendChild(info);
+li.appendChild(checkbox);
+checkbox.style.transform = "scale(1.3)";
+taskList.appendChild(li);
+  });
+}
+
+    renderTasks();
+    tasks.sort((a, b) => a.completed - b.completed);
+function saveTasks() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+  </script>
+<script>
+  window.addEventListener("load", () => {
+    const nickname = localStorage.getItem("user");
+    const isNewUser = localStorage.getItem("isNewUser");
+
+    if (!nickname) {
+      // ログインしてない場合は戻す
+      window.location.href = "login.html";
+    }
+
+    if (isNewUser === "true") {
+      alert("ようこそ " + nickname + " さん！");
+      localStorage.removeItem("isNewUser");
+    }
+  });
+</script>
+
+<script>
+function logout() {
+  localStorage.removeItem("user");
+  window.location.href = "login.html?logout";
+}
+</script>
+</body>
+</html>

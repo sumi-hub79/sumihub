@@ -1,0 +1,91 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+}
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+.tab-bar {
+  display: flex;
+  border-top: 1px solid #ccc;
+  background: #fff;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #e0e0e0;
+  font-weight: bold;
+}
+
+li {
+  background: white;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.subject {
+  font-weight: bold;
+}
+
+.days {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+select, input, button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+button {
+  background: black;
+  color: white;
+  border: none;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+#post {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
